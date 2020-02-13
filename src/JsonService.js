@@ -179,12 +179,15 @@ export class JsonService {
                 reject(Error("Network Error"));
             };
 
+            const encrpt = "client_secret" in payload && payload["client_secret"];
+            req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            if (encrpt) req.setRequestHeader("Authorization", "Basic " + btoa(payload["client_id"] + ":" + payload["client_secret"]));
+
             let body = "";
             for(let key in payload) {
 
                 let value = payload[key];
-
-                if (value) {
+                if (value && (!encrpt || (key !== "client_id" && key !== "client_secret"))) {
 
                     if (body.length > 0) {
                         body += "&";
@@ -195,8 +198,6 @@ export class JsonService {
                     body += encodeURIComponent(value);
                 }
             }
-
-            req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             req.send(body);
         });
     }
